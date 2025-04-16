@@ -1,0 +1,24 @@
+---
+# tasks file for run-dockerfile-role
+
+
+- name: Pull tar repo from github          # качает репозиторий с GitHub в /opt и разархивирует его
+  ansible.builtin.unarchive:
+    src: https://github.com/FSTEKbdit/prometheus-task/archive/refs/heads/main.tar.gz
+    dest: /opt
+    remote_src: yes
+
+- name: Build Python Prometheus image
+  community.docker.docker_image_build:
+    name: prometheus:latest
+    path: /opt/prometheus-task-main
+    dockerfile: Dockerfile
+
+- name: Create a data container
+  community.docker.docker_container:
+    name: prometheus_container
+    image: prometheus:latest
+    volumes:
+      - /opt/prometheus-task-main
+    ports:
+      - "8080:8080"
